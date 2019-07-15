@@ -29,7 +29,7 @@ module Cloudcms
                 :body => query.to_json
             i = 0
             while i < response.parsed['rows'].length
-                nodes.push(response.parsed['rows'][i])
+                nodes.push(Node.new(@driver, @platform, @project, @repository, self, response.parsed['rows'][i]))
                 i += 1
             end
             return nodes
