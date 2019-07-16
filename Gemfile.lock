@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    cloudcms (1.0.0)
+    cloudcms (1.0.1)
       json (~> 2.2)
       oauth2 (~> 1.4)
 
