@@ -7,7 +7,9 @@ begin
     puts "connected to api server at: #{cloudcms.config['baseURL']}"
     # puts 'platform: ' + JSON.pretty_generate(platform.data)
     puts "platform id: #{platform.data['_doc']}"
+    puts "project title: #{platform.project.data['title']}"
 
+    # list repositories
     repositories = platform.list_repositories
     # puts 'list_repositories: ' + JSON.pretty_generate(repositories)
 
@@ -33,7 +35,11 @@ begin
 
     nodes = master.query_nodes({_type: 'n:node'}, 0, 5)
 
-    node = master.read_node(nodes[0]["_doc"])
+    nodes.each do |node|
+        puts 'node: ' + JSON.pretty_generate(node)
+    end
+
+    node = master.read_node(nodes[0].data["_doc"])
     # puts 'node: ' + JSON.pretty_generate(node.data)
 
     new_node = {
@@ -69,6 +75,35 @@ begin
     node.reload
     puts 'reload: ' + JSON.pretty_generate(node.data)
     
+    # 
+    # test workflow creation
+    # 
+
+    # create a node
+    workflowResourceNode = master.create_node({'title': 'test workflow'})
+
+    # find workflow model
+    workflowModels = repositories = platform.query_workflow_models({'id': 'simple-publish'})
+    # puts 'workflowModels'
+    # workflowModels.each do |workflowModel|
+        # puts 'workflowModel: ' + JSON.pretty_generate(workflowModel)
+    # end
+
+    # create a workflow instance from the model
+    workflowInstance = platform.create_workflow(workflowModels[0]['_doc'], {
+        payloadType: 'content',
+        payloadData: {
+            repositoryId: platform.project.repository.data['_doc'],
+            branchId: platform.project.repository.master.data['_doc']
+        }
+    })
+
+    # add a node to the workflow instance
+    platform.add_workflow_resource(workflowInstance['_doc'], workflowResourceNode)
+
+    # start the workflow instance
+    platform.start_workflow(workflowInstance['_doc'])
+
 # rescue StandardError => err
 #     puts('Error: ')
 #     puts(err)

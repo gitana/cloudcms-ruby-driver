@@ -15,9 +15,13 @@ module Cloudcms
             @repository = repository
             @branch = branch
             
-            self.reload
+            # self.reload
             
             return self
+        end
+
+        def ref()
+            return "node://#{@platform.data['_doc']}/#{@repository.data['_doc']}/#{@branch.data['_doc']}/#{@data['_doc']}";
         end
 
         def reload()

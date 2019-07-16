@@ -63,5 +63,40 @@ module Cloudcms
             return response.parsed
         end
 
+        def query_workflow_models(query)
+            nodes = Array.new
+            response = @driver.connection.request :post, @driver.config['baseURL'] + "/workflow/models/query", 
+                :headers => {'Content-Type': 'application/json'}, 
+                :body => query.to_json
+            i = 0
+            while i < response.parsed['rows'].length
+                nodes.push(response.parsed['rows'][i])
+                i += 1
+            end
+            return nodes
+        end
+    
+        def create_workflow(modelId, object)
+            response = @driver.connection.request :post, @driver.config['baseURL'] + "/workflow/instances?modelId=#{modelId}", 
+                :headers => {'Content-Type': 'application/json'}, 
+                :body => object.to_json
+
+            # return JSON document describing the workflow instance
+            return response.parsed
+        end
+    
+        def add_workflow_resource(instanceId, node)
+            response = @driver.connection.request :post, @driver.config['baseURL'] + "/workflow/instances/#{instanceId}/resources/add?reference=#{node.ref()}", 
+                :headers => {'Content-Type': 'application/json'}
+
+            return response.parsed
+        end
+    
+        def start_workflow(instanceId)
+            response = @driver.connection.request :post, @driver.config['baseURL'] + "/workflow/instances/#{instanceId}/start"
+
+            return response.parsed
+        end
+    
     end
 end
